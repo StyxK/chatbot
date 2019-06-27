@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/StyxK/chatbot#readme",
   "dependencies": {
+    "dotenv": "^8.0.0",
     "express": "^4.17.1",
+    "node-wit": "^5.0.0",
     "nodemon": "^1.19.1"
   }
 }
