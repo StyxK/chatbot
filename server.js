@@ -1,32 +1,30 @@
 const express = require('express')
-const app = express()
 const config =  require('dotenv').config()
-const {Wit,log} =  require('node-wit')
+const app = express()
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+const client = require('./wit.ai')
+const bodyParser = require('body-parser')
 
-const client = new Wit({
-    accessToken : process.env.TOKEN,
-    actions : {
-        send(req,res){
-            return new Promise((resolve,reject)=>{
-                console.log(JSON.stringify(res))
-                return resolve
-            })
-        },
-        myAction({sessionId,context,text,entities}){
-            console.log(`Session ${sessionId} recieved ${text}`)
-            console.log(`The current context is ${JSON.stringify(context)}`)
-            console.log(`Wit extracted ${JSON.stringify(entities)}`)
-            return Promise.resolve(context)
-        }
-    },
-    logger : new log.Logger(log.DEBUG)
+app.use(bodyParser.json());
+bodyParser.urlencoded({extended:true})
+
+app.get('/',(req,res)=>{
+    res.sendFile(__dirname+'/index.html')
 })
 
-console.log(client.message('I need a sausage pizza'))
+io.on('connection',(socket)=>{
+    socket.emit('message',{hello : 'hello'})
+    socket.on('event',async (data)=>{
+        const message = await client(data)
+        await console.log("BOT ====> "+message._text)
+        const entities = await JSON.stringify(message.entities)
+        await console.log("BOT intent ====>"+entities )
+        await socket.emit('message',{hello : entities})
+    })
+})
 
-const sessionId = 'my-user-session-42'
-const context0 = {}
 
-app.listen(process.env.PORT,()=>{
+server.listen(process.env.PORT,()=>{
     console.log(`hello chatbot on port ${process.env.PORT}`)
 })

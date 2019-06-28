@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(()=>{
+            const socket = io.connect('http://localhost:8081')
+            
+            $('form').submit(()=>{
+                socket.emit('event',$('#event').val())
+                $('#chat_log').append($('<li>').text("me : "+$('#event').val()))  
+                $('#event').val('')
+                return false
+            })
+
+            socket.on('message',async (data)=>{
+                await $('#chat_log').append($('<li>').text("bot : "+data.hello))
+                await console.log(data)
+            })
+        })
+    </script>
+</head>
+<body>
+    <ul id="chat_log"></ul>
+    <form action="">
+        <input id='event' autocomplete="off"/><button>Send</button>
+    </form>
+</body>
+</html>
